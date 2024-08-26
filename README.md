@@ -1,13 +1,50 @@
-# news-analysis-telegram-bot-using-fluvio-sdf
+# News-Analysis-Telegram-Bot-using-Fluvio-SDF(Dataflows)
 News analysis telegram bot fetches and transforms news headlines from newsapi.org and textrazor and send them back to the user as a bot message 
 
+Below is the analyzed message format:
+
+```
+Classifying News Articles from the Past 24 hours:
+
+Article: <Article_Title>
+Classified Labels:
+ - <Lable>: <Score>
+ - <Lable>: <Score>
+
+Article: <Article_Title>
+Classified Labels:
+ - <Lable>: <Score>
+ - <Lable>: <Score>
+```
+
+
+```
 fluvio cluster start
+```
 
+```
+npm install
+```
+
+```
+npx ts-node index.ts
+```
+
+```
 sdf worker create main
+```
 
+```
 sdf run --ui --ephemeral -e NEWS_ORG=YOUR_NEWS_ORG_API_KEY -e TEXTRAZOR_KEY=YOUR_TEXTRAZOR_API_KEY -e BOT_TOKEN=YOUR_TELEGRAM_BOT_KEY
+```
 
+```
 sdf run --ephemeral -e NEWS_ORG=YOUR_NEWS_ORG_API_KEY -e TEXTRAZOR_KEY=YOUR_TEXTRAZOR_API_KEY -e BOT_TOKEN=YOUR_TELEGRAM_BOT_KEY
+```
+
+```
+sdf clean
+```
 
 ![image](https://github.com/user-attachments/assets/dae9febf-39f6-4713-b2e2-f4d754ce2209)
 
