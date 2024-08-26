@@ -1,0 +1,371 @@
+apiVersion: 0.5.0
+meta:
+  name: article-processing
+  version: 0.1.0
+  namespace: examples
+
+config:
+  converter: json
+  consumer:
+    default_starting_offset:
+      value: 0
+      position: End
+  producer:
+    batch_size: 1000000
+
+types:
+  source:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+  article:
+    type: object
+    properties:
+      title:
+        type: string
+      author:
+        type: string
+      published_at:
+        type: string
+      url:
+        type: string
+      source:
+        type: source
+  articles-list:
+    type: list
+    items:
+      type: article
+  articles:
+    type: object
+    properties:
+      chatid:
+        type: string
+      results:
+        type: articles-list
+  author-count:
+    type: object
+    properties:
+      author:
+        type: string
+      count:
+        type: u32
+  author-count-list:
+    type: list
+    items:
+      type: author-count
+  summarized-article:
+    type: object
+    properties:
+      counts:
+        type: author-count-list
+
+  labels:
+    type: object
+    properties:
+      label:
+        type: string
+      score:
+        type: f64
+
+  categories-list:
+    type: list
+    items:
+      type: labels
+
+  classification:
+    type: object
+    properties:
+      text:
+        type: string
+      categories:
+        type: categories-list
+
+  classification-list:
+    type: list
+    items:
+      type: classification
+
+  classifications:
+    type: object
+    properties:
+      chatid:
+        type: string
+      results:
+        type: classification-list
+
+topics:
+  userupdates:
+    schema:
+      value:
+        type: string
+        converter: raw
+  news:
+    schema:
+      value:
+        type: articles
+  summarized-articles:
+    schema:
+      value:
+        type: summarized-article
+  classified-articles:
+    schema:
+      value:
+        type: classifications
+  telegram-logs:
+    schema:
+      value:
+        type: string
+
+services:
+  fetch-articles:
+    sources:
+      - type: topic
+        id: userupdates
+    transforms:
+      - operator: map
+        dependencies:
+          - name: sdf-http
+            git: "https://github.com/infinyon/sdf-http-guest"
+            tag: "v0.4.0"
+          - name: serde_json
+            version: "1.0.117"
+        run: |
+          fn fetch_articles(chatid: String) -> Result<Articles> {
+              use sdf_http::blocking::send;
+              use sdf_http::http::Request;
+              use serde_json::{Value};
+
+              let url = "https://newsapi.org/v2/top-headlines?country=in";
+          
+              let api_key = std::env::var("NEWS_ORG")?;
+
+              let request = Request::builder()
+                  .method("GET")
+                  .header("X-Api-Key", api_key)
+                  .header("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36")
+                  .uri(url)
+                  .body("")?;
+
+              let response = send(request)?;
+              let body = response.into_body();
+              let body_str = String::from_utf8(body.clone())?;
+
+              let json: Value = serde_json::from_str(&body_str)?;
+
+              let articles = json["articles"]
+                  .as_array()
+                  .map(|articles| {
+                      articles.iter().map(|article| {
+                          let title = article["title"].as_str().unwrap_or("").to_string();
+                          let author = article["author"].as_str().unwrap_or("").to_string();
+                          let published_at = article["publishedAt"].as_str().unwrap_or("").to_string();
+                          let url = article["url"].as_str().unwrap_or("").to_string();
+                          let source_name = article["source"]["name"].as_str().unwrap_or("").to_string();
+                          let source_id = article["source"]["id"].as_str().unwrap_or("").to_string();
+
+                          Article {
+                              title,
+                              author,
+                              published_at,
+                              url,
+                              source: Source {
+                                  id: source_id,
+                                  name: source_name,
+                              },
+                          }
+                      }).collect::<Vec<Article>>()
+                  })
+                  .unwrap_or_else(Vec::new);
+
+              let result = Articles {
+                  chatid,
+                  results: articles,
+              };
+
+              Ok(result)
+            }
+
+    sinks:
+      - type: topic
+        id: news
+  summarize-articles:
+    sources:
+      - type: topic
+        id: news
+
+    transforms:
+      - operator: map
+        run: |
+          fn author_count_of_articles(articles: Articles) -> Result<SummarizedArticle> {
+
+            let mut author_count = std::collections::HashMap::new();
+            for article in &articles.results {
+              *author_count.entry(article.author.clone()).or_insert(0) += 1;
+            }
+            let author_counts: Vec<AuthorCount> = author_count.into_iter()
+              .map(|(author, count)| AuthorCount { author, count })
+              .collect();
+
+            Ok(SummarizedArticle {
+                counts: author_counts
+              })
+          }
+
+    sinks:
+      - type: topic
+        id: summarized-articles
+  classify-articles:
+    sources:
+      - type: topic
+        id: news
+
+    transforms:
+      - operator: map
+        dependencies:
+          - name: sdf-http
+            git: "https://github.com/infinyon/sdf-http-guest"
+            tag: "v0.4.0"
+          - name: serde_json
+            version: 1.0.117
+        run: |
+          fn classify_articles(articles: Articles) -> Result<Classifications> {
+              use sdf_http::blocking::send;
+              use sdf_http::http::Request;
+              use serde_json::{Value};
+
+              let url = "https://api.textrazor.com/";
+              let mut classification_list: Vec<Classification> = Vec::new();
+
+              for article in articles.results.iter().take(5) {
+                  let text = article.title.clone();
+                  let payload = format!("classifiers=textrazor_iab_content_taxonomy_3.0&text={}", text);
+          
+                  let api_key = std::env::var("TEXTRAZOR_KEY")?;                  
+
+                  let request = Request::builder()
+                      .method("POST")
+                      .uri(url)
+                      .header("x-textrazor-key", api_key)
+                      .header("Content-Type", "application/x-www-form-urlencoded")
+                      .body(payload)?;
+
+                  let response = send(request)?;
+                  let body = response.into_body();
+                  let body_str = String::from_utf8(body.clone())?;
+
+                  let mut json: Value = serde_json::from_str(&body_str)?;
+
+                  if let Some(response) = json.get_mut("response") {
+                      if let Some(categories) = response.get_mut("categories").and_then(Value::as_array_mut) {
+                          let mut owned_categories: Vec<Labels> = categories.iter()
+                              .map(|category| Labels {
+                                  label: category.get("label").unwrap_or(&Value::Null).as_str().unwrap_or("").to_string(),
+                                  score: category.get("score").unwrap_or(&Value::Null).as_f64().unwrap_or(0.0),
+                              })
+                              .collect();
+
+                          owned_categories.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap_or(std::cmp::Ordering::Equal));
+
+                          let top_two = if owned_categories.len() > 2 {
+                              owned_categories.into_iter().take(2).collect::<Vec<_>>()
+                          } else {
+                              owned_categories
+                          };
+
+                          classification_list.push(Classification {
+                              text: text.clone(),
+                              categories: top_two,
+                          });
+                      }
+                  }
+              }
+
+              Ok(Classifications {
+                  chatid: articles.chatid.clone(),
+                  results: classification_list,
+              })
+          }
+
+    sinks:
+      - type: topic
+        id: classified-articles
+  send-to-telegram:
+    sources:
+      - type: topic
+        id: classified-articles
+    transforms:
+      - operator: map
+        dependencies:
+          - name: sdf-http
+            git: "https://github.com/infinyon/sdf-http-guest"
+            tag: "v0.4.0"
+          - name: serde_json
+            version: 1.0.117
+        run: |
+          fn format_for_telegram(classifications: Classifications) -> Result<String> {
+              use sdf_http::http::Request;
+              use sdf_http::blocking::send;
+              use std::time::{SystemTime, UNIX_EPOCH};
+
+            
+            let bot_token = std::env::var("BOT_TOKEN")?;
+            let chat_id = classifications.chatid;
+            let mut text = String::new();
+            text.push_str(&format!("*Classifying News Articles from the Past 24 hours:*\n\n\n\n"));
+
+            for classification in &classifications.results {
+                text.push_str(&format!("*Article:* {}\n", classification.text));
+                text.push_str(&format!("*Classified Labels:*\n"));
+                for category in &classification.categories {
+                    text.push_str(&format!(" - *{}*: {:.2}\n", category.label, category.score));
+                }
+                text.push('\n');
+            }
+
+            let url = format!("https://api.telegram.org/bot{}/sendMessage", bot_token);
+            let body = serde_json::json!({
+                "chat_id": chat_id,
+                "text": text,
+                "parse_mode": "Markdown"
+            });
+
+            let request = Request::builder()
+                .method("POST")
+                .uri(url)
+                .header("Content-Type", "application/json")
+                .body(body.to_string())?;
+
+            let response = send(request)?;
+            let body = response.into_body();
+            let body_str = String::from_utf8(body)?;
+
+            let json: serde_json::Value = serde_json::from_str(&body_str)?;
+            let duration_since_epoch = SystemTime::now().duration_since(UNIX_EPOCH)?;
+            let timestamp = duration_since_epoch.as_secs();
+                if json.get("ok").and_then(serde_json::Value ::as_bool).unwrap_or(false) {
+                    Ok(format!(
+                    "timestamp: {} chatid: {} message sent successfully text: {}",
+                        timestamp,
+                        chat_id,
+                        text
+                    ))
+                } else {
+                    
+                    let error_message = json.get("description")
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or("Unknown error");
+            
+                    Ok(format!(
+                    "timestamp: {} chatid: {} error: {}",
+                    timestamp,
+                    chat_id,
+                    error_message
+                    ))
+                }
+          }
+    sinks:
+      - type: topic
+        id: telegram-logs
