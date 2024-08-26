@@ -2,8 +2,17 @@
 ![image](https://github.com/user-attachments/assets/e50c3042-3758-4ecf-b4bb-4edb14301187)
 
 ## Overview
-News analysis telegram bot fetches and transforms news headlines from newsapi.org  and textrazor and send them back to the user as a bot message 
+The News Analysis Telegram Bot fetches and transforms news headlines from newsapi.org and analyses them using TextRazor and sends them back to the user as a bot message using Fluvio Node.js Client and Stateful Dataflow(sdf) pipeline.
 
+### Graphical Represetation of the Project in Browser
+![image](https://github.com/user-attachments/assets/a7e8a121-1fa6-4bf5-bfb9-752e90ec7307)
+
+## Prerequisites
+1. Basic understanding of Event-Driven Architecture and APIs.
+2. Windows(WSL-Ubuntu) or Linux OS
+3. Rust 1.80 or beyond installed
+4. Node.js 16.11.0 or beyond installed
+5. Telegram Web-hooks
 
 ## Tech Stack
 1. **[Fluvio CLI](https://www.fluvio.io/docs/fluvio/apis/nodejs/installation)**
@@ -17,11 +26,7 @@ News analysis telegram bot fetches and transforms news headlines from newsapi.or
 3. **[Telegram Bot API](https://telegram.me/BotFather)** - *To communicate with bot*
 4. **[ngrok](https://ngrok.com/)** - *To create secure tunneling* 
 
-## Prerequisites
-1. Basic understanding of Event-Driven Architecture and APIs.
-2. Windows(WSL-Ubuntu) or Linux OS
-3. Rust 1.80 or beyond installed
-4. Node.js 16.11.0 or beyond installed
+
 
 ## Getting Started
 1. To install Fluvio, open terminal and run 
@@ -42,19 +47,33 @@ source ~/.bashrc
 ```
 fluvio cluster start
 ```
-4. Checkout to server folder
+4. Create the SDF worker
+```
+5. sdf worker create main
+```
+6. Run the SDF with the required API keys
+```
+sdf run --ui --ephemeral -e NEWS_ORG=YOUR_NEWS_ORG_API_KEY -e TEXTRAZOR_KEY=YOUR_TEXTRAZOR_API_KEY -e BOT_TOKEN=YOUR_TELEGRAM_BOT_KEY
+```
+7. Alternatively, you can run the SDF without the ui
+```
+sdf run --ephemeral -e NEWS_ORG=YOUR_NEWS_ORG_API_KEY -e TEXTRAZOR_KEY=YOUR_TEXTRAZOR_API_KEY -e BOT_TOKEN=YOUR_TELEGRAM_BOT_KEY
+```
+
+8. Now checkout to server folder
 ```
 cd server
 ```
-5. Install the required Node.js dependencies
+9. Install the required Node.js dependencies
 ```
 npm install
 ```
-6. Set your API keys of Telegram Bot ([follow Instructions](https://core.telegram.org/bots/tutorial#obtain-your-bot-token)) and [ngrok](https://dashboard.ngrok.com/get-started/your-authtoken) in .env file. 
-7. 
+10. Set your API keys of Telegram Bot ([follow Instructions](https://core.telegram.org/bots/tutorial#obtain-your-bot-token)) and [ngrok](https://dashboard.ngrok.com/get-started/your-authtoken) in .env file. 
+11. Start the server to receive events from Telegram
 ```
 npx ts-node index.ts
 ```
+![image](https://github.com/user-attachments/assets/4aa7e469-8aa3-4c75-9873-c2a0c5e23e42)
 
 ![photo_2024-08-26_20-20-35](https://github.com/user-attachments/assets/472da26d-bf1e-4c97-9cd6-421e4a5a8c86)
 ![photo_2024-08-26_20-20-35 (2)](https://github.com/user-attachments/assets/5fc29bf3-563b-4604-8046-5cc45b921a56)
@@ -62,35 +81,136 @@ npx ts-node index.ts
 ![photo_2024-08-26_20-20-35 (4)](https://github.com/user-attachments/assets/a5865964-715a-4eac-b4b7-6d21652ad73a)
 
 
-![image](https://github.com/user-attachments/assets/aba26d1a-30a7-4107-b3ad-6006615d6c8a)
 
-
-
-
-Create the SDF worker
+<details>
+<summary><h3><b>Sample Responses</b></h3></summary>
+ 
+**news topic** - Sample consumed event
+![image](https://github.com/user-attachments/assets/796ff497-d712-4ba6-b221-d432eb644e79)
+**Sample consumed Response Format**
 ```
-sdf worker create main
+{
+  "chatid": "5048923407",
+  "results": [
+    {
+      "author": "NDTV",
+      "published_at": "2024-08-25T11:25:15Z",
+      "source": {
+        "id": "google-news",
+        "name": "Google News"
+      },
+      "title": "On Haryana Poll Postponement Request, BJP Leader's Clarification - NDTV",
+      "url": "some url"
+    }
+  ]
+}
 ```
-Run the SDF with the required API keys
-```
-sdf run --ui --ephemeral -e NEWS_ORG=YOUR_NEWS_ORG_API_KEY -e TEXTRAZOR_KEY=YOUR_TEXTRAZOR_API_KEY -e BOT_TOKEN=YOUR_TELEGRAM_BOT_KEY
-```
-Alternatively, you can run the SDF without the UI
-```
-sdf run --ephemeral -e NEWS_ORG=YOUR_NEWS_ORG_API_KEY -e TEXTRAZOR_KEY=YOUR_TEXTRAZOR_API_KEY -e BOT_TOKEN=YOUR_TELEGRAM_BOT_KEY
-```
-
-![image](https://github.com/user-attachments/assets/dae9febf-39f6-4713-b2e2-f4d754ce2209)
-
-
+**summarized-articles topic** - Sample consumed event
 ![image](https://github.com/user-attachments/assets/eec1fcb6-9a43-48c4-8263-35ecdf7caf87)
-
+**Sample consumed Response Format**
+```
+{
+  "counts": [
+    {
+      "author": "WION",
+      "count": 1
+    },
+    {
+      "author": "NDTV Movies",
+      "count": 1
+    },
+    {
+      "author": "NDTV Sports",
+      "count": 1
+    },
+    {
+      "author": "The Economic Times",
+      "count": 1
+    },
+    {
+      "author": "Onmanorama",
+      "count": 1
+    },
+    {
+      "author": "TOI Etimes",
+      "count": 1
+    },
+    {
+      "author": "Mint",
+      "count": 1
+    },
+    {
+      "author": "Al Jazeera English",
+      "count": 1
+    },
+    {
+      "author": "Moneycontrol",
+      "count": 1
+    },
+    {
+      "author": "NDTV",
+      "count": 3
+    },
+    {
+      "author": "Hindustan Times",
+      "count": 5
+    },
+    {
+      "author": "BusinessLine",
+      "count": 1
+    },
+    {
+      "author": "The Indian Express",
+      "count": 1
+    },
+    {
+      "author": "The Hindu",
+      "count": 1
+    }
+  ]
+}
+```
+**classified-articles topic** - Sample consumed event
 ![image](https://github.com/user-attachments/assets/9c1ba7e7-9ead-43dc-aa7b-b2c2a09f4cd5)
+**Sample consumed Response Format**
+```
+{
+  "chatid": "1234567890",
+  "results": [
+    {
+      "categories": [
+        {
+          "label": "Politics",
+          "score": 0.7437
+        },
+        {
+          "label": "Politics>Elections",
+          "score": 0.5229
+        }
+      ],
+      "text": "On Haryana Poll Postponement Request, BJP Leader's Clarification - NDTV"
+    },
+    {
+      "categories": [
+        {
+          "label": "Science",
+          "score": 0.9956
+        },
+        {
+          "label": "Science>Space and Astronomy",
+          "score": 0.7291
+        }
+      ],
+      "text": "NASA Hubble captures 'candy-floss' in space. Meet our cosmic neighbours - Hindustan Times"
+    }
+  ]
+}
+```
 
+**telegram-logs topic** - Sample consumed event
 ![image](https://github.com/user-attachments/assets/70682023-ccea-47f6-a24f-dedfc12a700c)
 
-
-![image](https://github.com/user-attachments/assets/a7e8a121-1fa6-4bf5-bfb9-752e90ec7307)
+</details>
 
 
 ### Analyzed Message Format
