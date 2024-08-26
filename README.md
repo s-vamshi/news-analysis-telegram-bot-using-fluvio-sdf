@@ -18,6 +18,7 @@ Classified Labels:
 ```
 
 
+
 ```
 fluvio cluster start
 ```
@@ -29,6 +30,18 @@ npm install
 ```
 npx ts-node index.ts
 ```
+
+![photo_2024-08-26_20-20-35](https://github.com/user-attachments/assets/472da26d-bf1e-4c97-9cd6-421e4a5a8c86)
+![photo_2024-08-26_20-20-35 (2)](https://github.com/user-attachments/assets/5fc29bf3-563b-4604-8046-5cc45b921a56)
+![photo_2024-08-26_20-20-35 (3)](https://github.com/user-attachments/assets/f1e3e496-048a-4fa2-9fa7-4acc5aeb3879)
+![photo_2024-08-26_20-20-35 (4)](https://github.com/user-attachments/assets/a5865964-715a-4eac-b4b7-6d21652ad73a)
+
+
+![image](https://github.com/user-attachments/assets/aba26d1a-30a7-4107-b3ad-6006615d6c8a)
+
+
+
+
 
 ```
 sdf worker create main
