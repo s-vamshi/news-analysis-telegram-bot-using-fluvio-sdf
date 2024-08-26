@@ -49,9 +49,9 @@ fluvio cluster start
 ```
 4. Create the SDF worker
 ```
-5. sdf worker create main
+sdf worker create main
 ```
-6. Run the SDF with the required API keys
+6. Run the SDF with the required API keys which will compile and run the dataflow.
 ```
 sdf run --ui --ephemeral -e NEWS_ORG=YOUR_NEWS_ORG_API_KEY -e TEXTRAZOR_KEY=YOUR_TEXTRAZOR_API_KEY -e BOT_TOKEN=YOUR_TELEGRAM_BOT_KEY
 ```
@@ -75,12 +75,14 @@ npx ts-node index.ts
 ```
 ![image](https://github.com/user-attachments/assets/4aa7e469-8aa3-4c75-9873-c2a0c5e23e42)
 
-![photo_2024-08-26_20-20-35](https://github.com/user-attachments/assets/472da26d-bf1e-4c97-9cd6-421e4a5a8c86)
-![photo_2024-08-26_20-20-35 (2)](https://github.com/user-attachments/assets/5fc29bf3-563b-4604-8046-5cc45b921a56)
-![photo_2024-08-26_20-20-35 (3)](https://github.com/user-attachments/assets/f1e3e496-048a-4fa2-9fa7-4acc5aeb3879)
-![photo_2024-08-26_20-20-35 (4)](https://github.com/user-attachments/assets/a5865964-715a-4eac-b4b7-6d21652ad73a)
+<details>
+<summary><h3><b>Screenshots</b></h3></summary>
 
+<img src="https://github.com/user-attachments/assets/5fc29bf3-563b-4604-8046-5cc45b921a56" width=25% height=25%>
+<img src="https://github.com/user-attachments/assets/f1e3e496-048a-4fa2-9fa7-4acc5aeb3879" width=25% height=25%>
 
+<img src="https://github.com/user-attachments/assets/a5865964-715a-4eac-b4b7-6d21652ad73a" width="290" height="510">
+</details>
 
 <details>
 <summary><h3><b>Sample Responses</b></h3></summary>
