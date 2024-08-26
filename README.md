@@ -1,32 +1,57 @@
-# News-Analysis-Telegram-Bot-using-Fluvio-SDF(Dataflows)
-News analysis telegram bot fetches and transforms news headlines from newsapi.org and textrazor and send them back to the user as a bot message 
+# **News-Analysis-Telegram-Bot-using-Fluvio-SDF(Dataflows)**
+![image](https://github.com/user-attachments/assets/e50c3042-3758-4ecf-b4bb-4edb14301187)
 
-Below is the analyzed message format:
+## Overview
+News analysis telegram bot fetches and transforms news headlines from newsapi.org  and textrazor and send them back to the user as a bot message 
 
+
+## Tech Stack
+1. **[Fluvio CLI](https://www.fluvio.io/docs/fluvio/apis/nodejs/installation)**
+2. **[Stateful Dataflows(sdf)](https://www.fluvio.io/sdf/compositions/quickstart)**
+3. **Express.js**
+4. **ngrok**
+
+## APIs Used
+1. **[NewsAPI](https://newsapi.org/)(Free Tier)** - *To fetch News Articles*
+2. **[TextRazor](https://www.textrazor.com/)(Free Tier)** - *To classify News Articles*
+3. **[Telegram Bot API](https://telegram.me/BotFather)** - *To communicate with bot*
+4. **[ngrok](https://ngrok.com/)** - *To create secure tunneling* 
+
+## Prerequisites
+1. Basic understanding of Event-Driven Architecture and APIs.
+2. Windows(WSL-Ubuntu) or Linux OS
+3. Rust 1.80 or beyond installed
+4. Node.js 16.11.0 or beyond installed
+
+## Getting Started
+1. To install Fluvio, open terminal and run 
 ```
-Classifying News Articles from the Past 24 hours:
-
-Article: <Article_Title>
-Classified Labels:
- - <Lable>: <Score>
- - <Lable>: <Score>
-
-Article: <Article_Title>
-Classified Labels:
- - <Lable>: <Score>
- - <Lable>: <Score>
+curl -fsS https://hub.infinyon.cloud/install/install.sh | bash
 ```
-
-
-
+2. Add fluvio to your path and source the new .bashrc file
+```
+echo 'export PATH="${HOME}/.fvm/bin:${HOME}/.fluvio/bin:${PATH}"' >> ~/.bashrc
+```
+```
+echo 'source "${HOME}/.fvm/env"' >> ~/.bashrc
+```
+```
+source ~/.bashrc
+```
+3. Start fluvio cluster by running command below
 ```
 fluvio cluster start
 ```
-
+4. Checkout to server folder
+```
+cd server
+```
+5. Install the required Node.js dependencies
 ```
 npm install
 ```
-
+6. Set your API keys of Telegram Bot ([follow Instructions](https://core.telegram.org/bots/tutorial#obtain-your-bot-token)) and [ngrok](https://dashboard.ngrok.com/get-started/your-authtoken) in .env file. 
+7. 
 ```
 npx ts-node index.ts
 ```
@@ -42,21 +67,17 @@ npx ts-node index.ts
 
 
 
-
+Create the SDF worker
 ```
 sdf worker create main
 ```
-
+Run the SDF with the required API keys
 ```
 sdf run --ui --ephemeral -e NEWS_ORG=YOUR_NEWS_ORG_API_KEY -e TEXTRAZOR_KEY=YOUR_TEXTRAZOR_API_KEY -e BOT_TOKEN=YOUR_TELEGRAM_BOT_KEY
 ```
-
+Alternatively, you can run the SDF without the UI
 ```
 sdf run --ephemeral -e NEWS_ORG=YOUR_NEWS_ORG_API_KEY -e TEXTRAZOR_KEY=YOUR_TEXTRAZOR_API_KEY -e BOT_TOKEN=YOUR_TELEGRAM_BOT_KEY
-```
-
-```
-sdf clean
 ```
 
 ![image](https://github.com/user-attachments/assets/dae9febf-39f6-4713-b2e2-f4d754ce2209)
@@ -70,4 +91,34 @@ sdf clean
 
 
 ![image](https://github.com/user-attachments/assets/a7e8a121-1fa6-4bf5-bfb9-752e90ec7307)
+
+
+### Analyzed Message Format
+The bot sends analyzed messages in the following format:
+
+```
+Classifying News Articles from the Past 24 hours:
+
+Article: <Article_Title>
+Classified Labels:
+ - <Label>: <Score>
+ - <Label>: <Score>
+
+Article: <Article_Title>
+Classified Labels:
+ - <Label>: <Score>
+ - <Label>: <Score>
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
