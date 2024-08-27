@@ -16,7 +16,7 @@ The News Analysis Telegram Bot fetches and transforms news headlines from newsap
 
 ## Tech Stack
 1. **[Fluvio CLI](https://www.fluvio.io/docs/fluvio/apis/nodejs/installation)**
-2. **[Stateful Dataflows(sdf)](https://www.fluvio.io/sdf/compositions/quickstart)**
+2. **[Stateful Dataflows(sdf)](https://www.fluvio.io/sdf/concepts/composition/quickstart/)**
 3. **Express.js**
 4. **ngrok**
 
@@ -47,29 +47,41 @@ source ~/.bashrc
 ```
 fluvio cluster start
 ```
-4. Create the SDF worker
+4. Installing *wasm32-wasip1*
+```
+rustup target add wasm32-wasip1
+```
+5. Currently sdf is in beta mode so lets install it using fvm
+```
+fvm install sdf-beta1.1
+```
+6. Validating if prerequisites of sdf got installed correctly
+```
+sdf setup
+```
+7. Create the SDF worker
 ```
 sdf worker create main
 ```
-6. Run the SDF with the required API keys which will compile and run the dataflow.
+8. Run the SDF with the required API keys which will compile and run the dataflow.
 ```
 sdf run --ui --ephemeral -e NEWS_ORG=YOUR_NEWS_ORG_API_KEY -e TEXTRAZOR_KEY=YOUR_TEXTRAZOR_API_KEY -e BOT_TOKEN=YOUR_TELEGRAM_BOT_KEY
 ```
-7. Alternatively, you can run the SDF without the ui
+9. Alternatively, you can run the SDF without the ui
 ```
 sdf run --ephemeral -e NEWS_ORG=YOUR_NEWS_ORG_API_KEY -e TEXTRAZOR_KEY=YOUR_TEXTRAZOR_API_KEY -e BOT_TOKEN=YOUR_TELEGRAM_BOT_KEY
 ```
 
-8. Now checkout to server folder
+10. Now checkout to server folder
 ```
 cd server
 ```
-9. Install the required Node.js dependencies
+11. Install the required Node.js dependencies
 ```
 npm install
 ```
-10. Set your API keys of Telegram Bot ([follow Instructions](https://core.telegram.org/bots/tutorial#obtain-your-bot-token)) and [ngrok](https://dashboard.ngrok.com/get-started/your-authtoken) in .env file. 
-11. Start the server to receive events from Telegram
+12. Set your API keys of Telegram Bot ([follow Instructions](https://core.telegram.org/bots/tutorial#obtain-your-bot-token)) and [ngrok](https://dashboard.ngrok.com/get-started/your-authtoken) in .env file. 
+13. Start the server to receive events from Telegram
 ```
 npx ts-node index.ts
 ```
