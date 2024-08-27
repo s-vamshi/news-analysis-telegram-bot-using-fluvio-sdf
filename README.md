@@ -88,6 +88,10 @@ npx ts-node index.ts
 ![image](https://github.com/user-attachments/assets/4aa7e469-8aa3-4c75-9873-c2a0c5e23e42)
 
 14. As your server is up and running you can now use the Telegram bot to get updates using _/start_ and _/updates_ commands.
+15. **Note:** If you want to get news articles of different country other than India you can do that by changing below url in **dataflow.yaml** file.
+```
+https://newsapi.org/v2/top-headlines?country=<COUNTRY_CODE>
+```
 
 <details>
 <summary><h3><b>Screenshots</b></h3></summary>
