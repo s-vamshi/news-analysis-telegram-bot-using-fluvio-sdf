@@ -3,8 +3,11 @@
 ## Overview
 The News Analysis Telegram Bot fetches and transforms news headlines from newsapi.org and analyses them using TextRazor and sends them back to the user as a bot message using [Fluvio Node.js Client and Stateful Dataflow(sdf) pipeline](https://www.fluvio.io/).
 
-### Graphical Represetation of the Project in Browser
+## Graphical Represetation of the Project in Browser
 ![image](https://github.com/user-attachments/assets/a7e8a121-1fa6-4bf5-bfb9-752e90ec7307)
+
+## Demo Video
+[Demo_video](https://www.youtube.com/watch?v=tOWdfgjAPus)
 
 ## Prerequisites
 1. Basic understanding of Event-Driven Architecture and APIs.
