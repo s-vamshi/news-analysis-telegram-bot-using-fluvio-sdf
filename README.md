@@ -92,8 +92,8 @@ npx ts-node index.ts
 
 <img src="https://github.com/user-attachments/assets/5fc29bf3-563b-4604-8046-5cc45b921a56" width=25% height=25%>
 <img src="https://github.com/user-attachments/assets/f1e3e496-048a-4fa2-9fa7-4acc5aeb3879" width=25% height=25%>
-
-<img src="https://github.com/user-attachments/assets/a5865964-715a-4eac-b4b7-6d21652ad73a" width="290" height="510">
+<br/>
+<img src="https://github.com/user-attachments/assets/a5865964-715a-4eac-b4b7-6d21652ad73a">
 </details>
 
 <details>
@@ -235,7 +235,7 @@ Classifying News Articles from the Past 24 hours:
 
 Article: <Article_Title>
 Classified Labels:
- - <Label>: <Score>
+ - <Label>: <Probability_Score>
  - <Label>: <Score>
 
 Article: <Article_Title>
