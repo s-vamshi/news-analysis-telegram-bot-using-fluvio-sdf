@@ -64,6 +64,9 @@ sdf setup
 sdf worker create main
 ```
 8. Run the SDF with the required API keys which will compile and run the dataflow.
+   * [News API](https://newsapi.org/register)
+   * [TextRazor API](https://www.textrazor.com/)
+   * [Telegram Bot API](https://core.telegram.org/bots/tutorial#obtain-your-bot-token)
 ```
 sdf run --ui --ephemeral -e NEWS_ORG=YOUR_NEWS_ORG_API_KEY -e TEXTRAZOR_KEY=YOUR_TEXTRAZOR_API_KEY -e BOT_TOKEN=YOUR_TELEGRAM_BOT_KEY
 ```
